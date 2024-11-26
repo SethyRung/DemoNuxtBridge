@@ -39,11 +39,13 @@
 
 <script lang="ts" setup>
 const { $setupBridge } = useNuxtApp();
+const toast = useToast();
 
 if (import.meta.client) {
   $setupBridge((bridge) => {
     bridge.registerHandler("jsHandler", function (data, responseCallback) {
       console.log("native data:", data);
+      toast.add({ title: "native data:", description: JSON.stringify(data) });
       responseCallback({
         msg: "I have received your data",
       });
@@ -55,7 +57,17 @@ const callToNative = () => {
   $setupBridge((bridge) => {
     bridge.callHandler("nativeHandler", { key1: "value1" }, (responseData) => {
       console.log("JS received response:", responseData);
+      toast.add({
+        title: "JS received response:",
+        description: JSON.stringify(responseData),
+      });
     });
   });
+  if (!window.WKWebViewJavascriptBridge)
+    toast.add({
+      icon: "i-heroicons-exclamation-circle-16-solid",
+      color: "red",
+      title: "This button only works in the native app (WebView).",
+    });
 };
 </script>
